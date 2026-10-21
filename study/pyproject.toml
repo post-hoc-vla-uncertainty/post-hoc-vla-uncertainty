@@ -1,0 +1,44 @@
+[project]
+name = "vla-uncertainty-reproduction"
+version = "0.1.0"
+description = "Pinned UQ-VLA reproduction and uncertainty research environment"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+  "lerobot[smolvla,libero,uncertainty]",
+  "torch==2.7.1",
+  "torchvision==0.22.1",
+  "torchcodec==0.4.0",
+  "transformers==4.53.3",
+  "gpytorch>=1.14,<1.15",
+  "cmake>=3.29,<4",
+  "numpy<2",
+  "scipy",
+  "scikit-learn",
+  "matplotlib",
+  "seaborn",
+  "pandas",
+  "pyarrow",
+  "PyYAML",
+  "pytest>=8,<9",
+  "timm",
+  "hydra-core>=1.2,<1.4",
+  "zarr>=2.18,<3",
+]
+
+[tool.uv]
+package = false
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+
+[tool.uv.extra-build-dependencies]
+egl-probe = ["cmake>=3.29,<4"]
+hf-egl-probe = ["cmake>=3.29,<4"]
+
+[tool.uv.sources]
+lerobot = { path = "upstream/uq_vla", editable = true }
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

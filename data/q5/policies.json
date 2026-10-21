@@ -1,0 +1,200 @@
+{
+ "primary_s0": {
+  "role": "primary",
+  "seed_triple": 0,
+  "training_seed": 0,
+  "config": "configs/smolvla/train/q5_primary_s0.yaml",
+  "updates": 14840,
+  "data": "HuggingFaceVLA/libero, all 379 LIBERO-10 demonstrations",
+  "clean_success_mean": 0.766,
+  "clean_success_per_task": {
+   "libero_10/0": 0.68,
+   "libero_10/1": 0.66,
+   "libero_10/2": 0.68,
+   "libero_10/3": 0.94,
+   "libero_10/4": 0.86,
+   "libero_10/5": 1.0,
+   "libero_10/6": 0.56,
+   "libero_10/7": 0.78,
+   "libero_10/8": 0.7,
+   "libero_10/9": 0.8
+  },
+  "checkpoint_sha256": "6c073c198b46c45f2a1d1332c2cd402be0bdaad57bd36eca8fad99b94a0eff0f"
+ },
+ "primary_s1": {
+  "role": "primary",
+  "seed_triple": 1,
+  "training_seed": 1,
+  "config": "configs/smolvla/train/q5_primary_s1.yaml",
+  "updates": 14840,
+  "data": "HuggingFaceVLA/libero, all 379 LIBERO-10 demonstrations",
+  "clean_success_mean": 0.822,
+  "clean_success_per_task": {
+   "libero_10/0": 0.72,
+   "libero_10/1": 0.74,
+   "libero_10/2": 0.9,
+   "libero_10/3": 0.96,
+   "libero_10/4": 0.76,
+   "libero_10/5": 0.96,
+   "libero_10/6": 0.74,
+   "libero_10/7": 0.82,
+   "libero_10/8": 0.78,
+   "libero_10/9": 0.84
+  },
+  "checkpoint_sha256": "fc19fa5e3a839a0c93aa89e4c327c6789a9e94bb41bdf4f18302a19cc92a2a48"
+ },
+ "primary_s2": {
+  "role": "primary",
+  "seed_triple": 2,
+  "training_seed": 2,
+  "config": "configs/smolvla/train/q5_primary_s2.yaml",
+  "updates": 14840,
+  "data": "HuggingFaceVLA/libero, all 379 LIBERO-10 demonstrations",
+  "clean_success_mean": 0.79,
+  "clean_success_per_task": {
+   "libero_10/0": 0.66,
+   "libero_10/1": 0.84,
+   "libero_10/2": 0.9,
+   "libero_10/3": 0.94,
+   "libero_10/4": 0.78,
+   "libero_10/5": 0.94,
+   "libero_10/6": 0.58,
+   "libero_10/7": 0.74,
+   "libero_10/8": 0.68,
+   "libero_10/9": 0.84
+  },
+  "checkpoint_sha256": "6982857f6da5ec94dea8ad766f947cf0e930e97481e3f96ec59d73075220ee4e"
+ },
+ "companion_s0": {
+  "role": "companion",
+  "seed_triple": 0,
+  "training_seed": 10,
+  "config": "configs/smolvla/train/q5_companion_s0.yaml",
+  "updates": 14840,
+  "data": "HuggingFaceVLA/libero, all 379 LIBERO-10 demonstrations",
+  "clean_success_mean": 0.834,
+  "clean_success_per_task": {
+   "libero_10/0": 0.78,
+   "libero_10/1": 0.7,
+   "libero_10/2": 0.88,
+   "libero_10/3": 0.98,
+   "libero_10/4": 0.86,
+   "libero_10/5": 0.98,
+   "libero_10/6": 0.64,
+   "libero_10/7": 0.86,
+   "libero_10/8": 0.84,
+   "libero_10/9": 0.82
+  },
+  "checkpoint_sha256": "0c9a19c51e385871c34f667430d27476384a2dd5b548223553bad90b2fca5a37"
+ },
+ "companion_s1": {
+  "role": "companion",
+  "seed_triple": 1,
+  "training_seed": 11,
+  "config": "configs/smolvla/train/q5_companion_s1.yaml",
+  "updates": 14840,
+  "data": "HuggingFaceVLA/libero, all 379 LIBERO-10 demonstrations",
+  "clean_success_mean": 0.832,
+  "clean_success_per_task": {
+   "libero_10/0": 0.74,
+   "libero_10/1": 0.86,
+   "libero_10/2": 0.82,
+   "libero_10/3": 0.94,
+   "libero_10/4": 0.78,
+   "libero_10/5": 0.96,
+   "libero_10/6": 0.68,
+   "libero_10/7": 0.8,
+   "libero_10/8": 0.88,
+   "libero_10/9": 0.86
+  },
+  "checkpoint_sha256": "3be25b57d5c15889332ba9bac7a28682ddf2e1572c342e158f91e456c5ad7814"
+ },
+ "companion_s2": {
+  "role": "companion",
+  "seed_triple": 2,
+  "training_seed": 12,
+  "config": "configs/smolvla/train/q5_companion_s2.yaml",
+  "updates": 14840,
+  "data": "HuggingFaceVLA/libero, all 379 LIBERO-10 demonstrations",
+  "clean_success_mean": 0.804,
+  "clean_success_per_task": {
+   "libero_10/0": 0.8,
+   "libero_10/1": 0.76,
+   "libero_10/2": 0.94,
+   "libero_10/3": 0.92,
+   "libero_10/4": 0.82,
+   "libero_10/5": 0.94,
+   "libero_10/6": 0.58,
+   "libero_10/7": 0.66,
+   "libero_10/8": 0.8,
+   "libero_10/9": 0.82
+  },
+  "checkpoint_sha256": "d69404ab8c336b26d2734fe761bd478bcb7db857fe18f4d93f1ce04533b90bb0"
+ },
+ "supervisor_s0": {
+  "role": "supervisor",
+  "seed_triple": 0,
+  "training_seed": 20,
+  "config": "configs/smolvla/train/q5_supervisor_s0.yaml",
+  "updates": 14840,
+  "data": "HuggingFaceVLA/libero, all 379 LIBERO-10 demonstrations, Q5 supervisor augmentation (p = 0.5)",
+  "clean_success_mean": 0.784,
+  "clean_success_per_task": {
+   "libero_10/0": 0.78,
+   "libero_10/1": 0.74,
+   "libero_10/2": 0.8,
+   "libero_10/3": 0.88,
+   "libero_10/4": 0.76,
+   "libero_10/5": 0.94,
+   "libero_10/6": 0.66,
+   "libero_10/7": 0.7,
+   "libero_10/8": 0.74,
+   "libero_10/9": 0.84
+  },
+  "checkpoint_sha256": "0f83541d02e5cf42cbc183e68870c26f6fae974639470cd32154ac5b5dbb6602"
+ },
+ "supervisor_s1": {
+  "role": "supervisor",
+  "seed_triple": 1,
+  "training_seed": 21,
+  "config": "configs/smolvla/train/q5_supervisor_s1.yaml",
+  "updates": 14840,
+  "data": "HuggingFaceVLA/libero, all 379 LIBERO-10 demonstrations, Q5 supervisor augmentation (p = 0.5)",
+  "clean_success_mean": 0.758,
+  "clean_success_per_task": {
+   "libero_10/0": 0.8,
+   "libero_10/1": 0.78,
+   "libero_10/2": 0.94,
+   "libero_10/3": 0.88,
+   "libero_10/4": 0.74,
+   "libero_10/5": 0.96,
+   "libero_10/6": 0.52,
+   "libero_10/7": 0.68,
+   "libero_10/8": 0.5,
+   "libero_10/9": 0.78
+  },
+  "checkpoint_sha256": "94f0a0d6b8c5244ca9e5a10f987d78947ae2ba1e17afbf6b75f91cd0ce52b0c8"
+ },
+ "supervisor_s2": {
+  "role": "supervisor",
+  "seed_triple": 2,
+  "training_seed": 22,
+  "config": "configs/smolvla/train/q5_supervisor_s2.yaml",
+  "updates": 14840,
+  "data": "HuggingFaceVLA/libero, all 379 LIBERO-10 demonstrations, Q5 supervisor augmentation (p = 0.5)",
+  "clean_success_mean": 0.79,
+  "clean_success_per_task": {
+   "libero_10/0": 0.82,
+   "libero_10/1": 0.74,
+   "libero_10/2": 0.88,
+   "libero_10/3": 0.96,
+   "libero_10/4": 0.82,
+   "libero_10/5": 1.0,
+   "libero_10/6": 0.54,
+   "libero_10/7": 0.72,
+   "libero_10/8": 0.64,
+   "libero_10/9": 0.78
+  },
+  "checkpoint_sha256": "2089fb8195686c99bd45bf0e5257545ebc7ac021e5ce18c1a8cc5c1065c88098"
+ }
+}

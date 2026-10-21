@@ -1,0 +1,8 @@
+{
+  "estimator_code_after": "8e69737762c8e88394727e6895b5c68b751215ebb05005ee778c3e68f687f5f8",
+  "estimator_code_before": "25b742a59e317c4cbfb370354ca68516c2bcafe9c4baca3d4ce88be8a8b6986d",
+  "kind": "head_study_kvt_float64_v1",
+  "scope": "Float64 KV-T stable algebra and fresh optimizer identities; unchanged KV/feature/projection math; model-specific GPU dispatch",
+  "source_after": "a1d1f3591a4119a9987eb6634b1e2b994215d78faac869baff274039dcb5b376",
+  "source_before": "e53c03030fde1ba031ebfc673c947bf8d62fed4c049f224a04ab4ce62f4eab2e"
+}

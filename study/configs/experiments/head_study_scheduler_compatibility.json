@@ -1,0 +1,12 @@
+{
+  "base_source_hash": "5f04f550f7bd2e382708fdef67258a0c19818bfc5727b8dc9e810b6bf604ba6d",
+  "kind": "head_study_scheduler_v1",
+  "recipes_hash": "3ebf363b6b8755a64cc8d2ae8d391d1ef854fc18f5ffae70dbfeba9b4093d387",
+  "scope": "Operational scheduling, failure reporting and audited cache/source compatibility only; numerical recipes unchanged",
+  "source_after": "e53c03030fde1ba031ebfc673c947bf8d62fed4c049f224a04ab4ce62f4eab2e",
+  "stage_order": [
+    "observation_reference",
+    "action_kv",
+    "action_kv_t"
+  ]
+}

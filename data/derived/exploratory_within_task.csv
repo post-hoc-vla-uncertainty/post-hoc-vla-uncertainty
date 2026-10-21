@@ -1,0 +1,13 @@
+study,condition,family,configurations,mean,median,maximum,lower_bound_above_zero
+followup_study,original,KV,75,0.00977119,0.0112124,0.0567391,0
+followup_study,original,KV-T,9,0.00852839,0.00372093,0.0500069,0
+followup_study,original,paper scores,7,0.0347721,0.0424225,0.0505998,0
+followup_study,plus35,KV,75,0.0371782,0.0390327,0.0969934,15
+followup_study,plus35,KV-T,9,0.058733,0.0673475,0.0766181,3
+followup_study,plus35,paper scores,7,0.01208,0.00550841,0.0839107,1
+original_study,round_0,KV,105,0.015229,0.0158479,0.175911,0
+original_study,round_0,KV-T,76,0.0113229,0.0174326,0.163233,0
+original_study,round_0,paper scores,7,-0.0119991,-0.0396197,0.207607,0
+original_study,round_10,KV,105,0.0967647,0.10031,0.309204,7
+original_study,round_10,KV-T,78,0.0323496,0.0155119,0.292658,3
+original_study,round_10,paper scores,7,-0.0273305,-0.0279214,0.0568769,0

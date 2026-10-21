@@ -1,0 +1,57 @@
+# Downloaded repositories, datasets, weights, and machine-local dependencies.
+/reference_src/
+/upstream/
+# Independently versioned manuscript repository (not a submodule).
+/paper/
+/storage/
+/.venv/
+/.cache/
+/.local/
+
+# Generated run artifacts. Keep report-generation source, not its output.
+# Curated publications in /shared_results/ are intentionally versioned.
+/.shared_results-building-*/
+/.shared_results-previous/
+/output/
+/outputs/
+/results/
+/logs/
+/reports/**
+!/reports/**/
+!/reports/**/*.py
+checkpoints/
+wandb/
+mlruns/
+*.log
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.tfevents.*
+
+# Python/build/test caches.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+*.egg-info/
+/build/
+/dist/
+.coverage
+.coverage.*
+/htmlcov/
+/coverage.xml
+
+# Local secrets and editor/OS state; example environment files remain shareable.
+.env
+.env.*
+!.env.example
+!.env.template
+/.idea/
+/.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

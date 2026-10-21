@@ -1,0 +1,9 @@
+{
+  "split": "development",
+  "early_budget": 5,
+  "late_budget": 50,
+  "early_artifact": "REPLACE_WITH_ACTUAL_EARLY_DEVELOPMENT_COMPARISON.json",
+  "late_artifact": "REPLACE_WITH_ACTUAL_LATE_DEVELOPMENT_COMPARISON.json",
+  "selected_refit_steps": 4000,
+  "rationale": "REPLACE_WITH_OBSERVED_FITTING_ADEQUACY"
+}

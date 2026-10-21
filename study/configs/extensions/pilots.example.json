@@ -1,0 +1,5 @@
+[
+  {"run_dir": "storage/extensions/runs/pilot/save_warm_50_50/upstream_reference/random/seed_1000", "training_mode": "save_warm_50_50", "round": 0},
+  {"run_dir": "storage/extensions/runs/pilot/save_warm_50_50/upstream_reference/random/seed_1000", "training_mode": "save_warm_50_50", "round": 5},
+  {"run_dir": "storage/extensions/runs/pilot/save_warm_50_50/upstream_reference/random/seed_1000", "training_mode": "save_warm_50_50", "round": 15}
+]

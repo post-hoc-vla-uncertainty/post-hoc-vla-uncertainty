@@ -1,0 +1,18 @@
+variant,group,conditions,drop,kv_ctx,kv_dec,vfd
+I1:P3,Instruction,100,0.1833,0.7762,0.9619,0.7080
+I2:all,Instruction,100,0.5333,0.8613,0.9968,0.9540
+I3:typo,Instruction,100,0.2733,0.8019,0.9795,0.8270
+I4:pronouns,Instruction,100,0.7567,0.9978,1.0000,0.9610
+I5:german,Instruction,100,0.7800,1.0000,1.0000,0.9910
+V1:x0.4,Camera images,100,0.2000,0.7832,0.8229,0.7600
+V2:sigma0.08,Camera images,100,-0.0233,0.6210,0.6330,0.5610
+V3:2cm3deg,Camera images,100,0.0767,0.6838,0.7666,0.6900
+V4:50,Camera images,100,0.0067,0.5883,0.5858,0.5410
+V5:table,Camera images,100,0.1333,0.7610,0.7536,0.7530
+V6:blackout,Camera images,100,0.7867,0.9958,1.0000,0.9990
+V7:grey,Camera images,100,0.7867,1.0000,1.0000,0.9900
+S1:6cm,Scene,100,0.4633,0.6808,0.7243,0.6220
+S2:near,Scene,90,0.4111,0.7566,0.8394,0.6767
+S3:90deg,Scene,100,0.3867,0.6235,0.6451,0.6070
+R1:0.1rad,Robot,100,0.2733,0.8622,0.9768,0.9430
+R2:3cm,Robot,100,0.1367,0.5015,0.6792,0.6170

@@ -1,0 +1,28 @@
+# Q5 (handoff/q5, Section 3): companion policy for seed triple 2 (training seed 12). Trained like the paper's policies (SmolVLM2 weights, new 480-wide action expert)
+# on all 379 LIBERO-10 demonstrations (101,469 frames), no image augmentation, the pre-training recipe
+# of Römer et al.: batch 32, AdamW 1e-4, cosine decay with warm-up = steps / 30, 14,840 updates (4.68 passes).
+dataset:
+  repo_id: HuggingFaceVLA/libero
+  root: storage/huggingface/lerobot/HuggingFaceVLA/libero
+  libero_tasks:
+    libero_10: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+policy:
+  type: smolvla
+  device: cuda
+  push_to_hub: false
+  optimizer_lr: 0.0001
+  scheduler_warmup_steps: 495
+  scheduler_decay_steps: 14840
+  scheduler_decay_lr: 2.5e-06
+  repo_id: local/q5_companion_s2
+steps: 14840
+batch_size: 32
+num_workers: 8
+enable_val_loss: false
+eval_freq: 0
+save_freq: 14840
+seed: 12
+wandb:
+  enable: false
+output_dir: outputs/q5/policies/companion_s2
+job_name: q5_companion_s2

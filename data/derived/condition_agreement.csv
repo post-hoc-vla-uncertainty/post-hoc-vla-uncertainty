@@ -1,0 +1,16 @@
+round,pair,kind,spearman
+0,1000-1001,primary-primary,0.260037
+0,1000-1002,primary-primary,0.190604
+0,1001-1002,primary-primary,0.137264
+0,1000,primary-supervisor,0.17211
+0,1001,primary-supervisor,0.173836
+0,1002,primary-supervisor,0.0544507
+10,1000-1001,primary-primary,0.0749937
+all,1000-1001,supervisor-supervisor,0.197505
+10,1000-1002,primary-primary,0.169517
+all,1000-1002,supervisor-supervisor,0.260087
+10,1001-1002,primary-primary,0.073696
+all,1001-1002,supervisor-supervisor,0.21766
+10,1000,primary-supervisor,0.164055
+10,1001,primary-supervisor,0.0847588
+10,1002,primary-supervisor,0.0678996

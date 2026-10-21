@@ -1,0 +1,477 @@
+diff --git a/src/iterative_fine_tuning/evaluate_run.py b/src/iterative_fine_tuning/evaluate_run.py
+index 3ff7258..56d2402 100644
+--- a/src/iterative_fine_tuning/evaluate_run.py
++++ b/src/iterative_fine_tuning/evaluate_run.py
+@@ -572,6 +572,9 @@ def _launch_member_evaluation(
+     env = os.environ.copy()
+     if visible_device is not None:
+         env["CUDA_VISIBLE_DEVICES"] = visible_device
++        if env.get("VLA_PROJECT_ROOT") and env.get("MUJOCO_GL") == "egl":
++            from lerobot.utils.gpu_utils import configure_egl_for_visible_cuda
++            configure_egl_for_visible_cuda(env)
+ 
+     logger.info(
+         "Launching evaluation for round %s member %s on device %s",
+diff --git a/src/iterative_fine_tuning/evaluation.py b/src/iterative_fine_tuning/evaluation.py
+index 5cc2f1d..02ed99a 100644
+--- a/src/iterative_fine_tuning/evaluation.py
++++ b/src/iterative_fine_tuning/evaluation.py
+@@ -4,6 +4,7 @@ from __future__ import annotations
+ 
+ import logging
+ import math
++import os
+ import time
+ from contextlib import nullcontext
+ from dataclasses import dataclass, field
+@@ -92,7 +93,12 @@ def normalize_worker_device(device: str) -> tuple[str, str | None]:
+     if normalized.isdigit():
+         normalized = f"cuda:{normalized}"
+     if normalized.startswith("cuda:"):
+-        return "cuda", normalized.split(":", 1)[1]
++        index = normalized.split(":", 1)[1]
++        visible = os.environ.get("CUDA_VISIBLE_DEVICES")
++        if visible is not None:
++            devices = [item.strip() for item in visible.split(",") if item.strip()]
++            index = devices[int(index)]
++        return "cuda", index
+     return normalized, None
+ 
+ 
+@@ -247,6 +253,12 @@ def _evaluate_task(
+     use_amp: bool,
+     device_type: str,
+ ) -> TaskEvaluation:
++    # BEGIN RUN PROGRESS
++    progress = None
++    if os.environ.get('VLA_PROJECT_ROOT'):
++        from run_progress import Progress
++        progress = Progress(f'evaluate {task_spec.task_group}/{task_spec.task_id}', n_rollouts, unit='rollouts', every=eval_batch_size)
++    # END RUN PROGRESS
+     task_started_at = utc_timestamp()
+     task_start_time = time.perf_counter()
+     if env_type == "metaworld":
+@@ -308,9 +320,19 @@ def _evaluate_task(
+                         "seed": int(rollout_seed),
+                     }
+                 )
++            # BEGIN RUN PROGRESS
++            if progress is not None:
++                progress.update(len(rollout_results), f'success={sum(int(r["success"]) for r in rollout_results)}/{len(rollout_results)}')
++            # END RUN PROGRESS
+     finally:
+         env.close()
+ 
++    # BEGIN RUN PROGRESS
++    if progress is not None:
++        successful = sum(int(item['success']) for item in rollout_results)
++        progress.update(len(rollout_results), f'success={successful}/{len(rollout_results)}', force=True)
++        progress.finish(f'success={successful}/{len(rollout_results)}; mean_steps={sum(r["steps"] for r in rollout_results)/max(1,len(rollout_results)):.1f}')
++    # END RUN PROGRESS
+     successes = sum(int(item["success"]) for item in rollout_results)
+     ci_lower, ci_upper = _compute_binomial_ci(successes, len(rollout_results))
+ 
+diff --git a/src/iterative_fine_tuning/main.py b/src/iterative_fine_tuning/main.py
+index 22c7f8a..716390c 100644
+--- a/src/iterative_fine_tuning/main.py
++++ b/src/iterative_fine_tuning/main.py
+@@ -77,7 +77,7 @@ def _training_outputs_exist(model_paths: list[str]) -> bool:
+     return bool(model_paths) and all(Path(path).exists() for path in model_paths)
+ 
+ 
+-def _run_single(cfg: IterativeFineTuningConfig) -> None:
++def _run_single(cfg: IterativeFineTuningConfig, *, before_round=None, after_round=None) -> None:
+     layout = RunLayout(root=cfg.run_dir())
+     layout.root.mkdir(parents=True, exist_ok=True)
+     # Freeze config to disk so evaluate_run.py can reconstruct settings without the original file.
+@@ -107,6 +107,11 @@ def _run_single(cfg: IterativeFineTuningConfig) -> None:
+         start_model_paths = round_record.start_model_paths or _determine_round_start_models(cfg, state)
+         round_record.start_model_paths = list(start_model_paths)
+ 
++        # Local reproduction can evaluate/retire artifacts at round boundaries.
++        # Callbacks do not change selection, optimization, or their RNG streams.
++        if before_round is not None:
++            before_round(cfg, state, round_index)
++
+         if STAGE_SELECT in cfg.execution.stages:
+             should_run_selection = (
+                 cfg.execution.overwrite_existing_round
+@@ -191,6 +196,9 @@ def _run_single(cfg: IterativeFineTuningConfig) -> None:
+                 state.upsert_round(round_record)
+                 save_dataclass_json(state, layout.run_state_path)
+ 
++        if after_round is not None:
++            after_round(cfg, state, round_index)
++
+     logger.info("Iterative fine-tuning complete. Run directory: %s", layout.root)
+ 
+ 
+diff --git a/src/iterative_fine_tuning/manifests.py b/src/iterative_fine_tuning/manifests.py
+index 79017a4..3344668 100644
+--- a/src/iterative_fine_tuning/manifests.py
++++ b/src/iterative_fine_tuning/manifests.py
+@@ -3,6 +3,7 @@
+ from __future__ import annotations
+ 
+ import json
++import os
+ from dataclasses import asdict, dataclass, field, is_dataclass
+ from datetime import datetime, timezone
+ from pathlib import Path
+@@ -30,6 +31,10 @@ def _to_jsonable(value: Any) -> Any:
+ 
+ 
+ def save_dataclass_json(obj: Any, path: Path) -> None:
++    if os.environ.get("VLA_REPRODUCTION_POLICY"):
++        from reproduction_storage import atomic_json
++        atomic_json(path, _to_jsonable(obj))
++        return
+     path.parent.mkdir(parents=True, exist_ok=True)
+     with open(path, "w", encoding="utf-8") as handle:
+         json.dump(_to_jsonable(obj), handle, indent=2, sort_keys=False)
+diff --git a/src/iterative_fine_tuning/training.py b/src/iterative_fine_tuning/training.py
+index b996516..f01797f 100644
+--- a/src/iterative_fine_tuning/training.py
++++ b/src/iterative_fine_tuning/training.py
+@@ -312,7 +312,12 @@ def _round_config_snapshot_path(round_layout: RoundLayout) -> Path:
+ def _normalize_worker_device(device: str) -> tuple[str, str | None]:
+     normalized = str(device).strip()
+     if normalized.startswith("cuda:"):
+-        return "cuda", normalized.split(":", 1)[1]
++        index = normalized.split(":", 1)[1]
++        visible = os.environ.get("CUDA_VISIBLE_DEVICES")
++        if visible is not None:
++            devices = [item.strip() for item in visible.split(",") if item.strip()]
++            index = devices[int(index)]
++        return "cuda", index
+     return normalized, None
+ 
+ 
+@@ -372,6 +377,10 @@ def _run_parallel_member_training(
+         env = os.environ.copy()
+         if visible_device is not None:
+             env["CUDA_VISIBLE_DEVICES"] = visible_device
++            # EGL enumeration differs from CUDA/PCI order. Resolve after remapping.
++            if env.get("VLA_PROJECT_ROOT") and env.get("MUJOCO_GL") == "egl":
++                from lerobot.utils.gpu_utils import configure_egl_for_visible_cuda
++                configure_egl_for_visible_cuda(env)
+ 
+         logger.info(
+             "Launching ensemble member %s on device %s via worker process",
+@@ -656,6 +665,12 @@ def _run_single_training_round(
+         logger.info("Sampling weights: %s", sampling_weights)
+ 
+     step = 0
++    # BEGIN RUN PROGRESS
++    progress = None
++    if is_main_process and os.environ.get('VLA_PROJECT_ROOT'):
++        from run_progress import TrainingProgress
++        progress = TrainingProgress(f'{training_dir.parent.parent.parent.name}/{training_dir.parent.parent.name}/member_{member_index:02d}', train_cfg.steps, train_tracker)
++    # END RUN PROGRESS
+     for _ in range(train_cfg.steps):
+         start_time = time.perf_counter()
+         batch = next(dl_iter)
+@@ -674,6 +689,10 @@ def _run_single_training_round(
+ 
+         step += 1
+         train_tracker.step()
++        # BEGIN RUN PROGRESS
++        if progress is not None:
++            progress.record(train_tracker)
++        # END RUN PROGRESS
+         is_log_step = train_cfg.log_freq > 0 and step % train_cfg.log_freq == 0 and is_main_process
+         is_saving_step = step % train_cfg.save_freq == 0 or step == train_cfg.steps
+         is_eval_step = train_cfg.eval_freq > 0 and step % train_cfg.eval_freq == 0
+@@ -743,6 +762,10 @@ def _run_single_training_round(
+     if eval_env is not None:
+         close_envs(eval_env)
+ 
++    # BEGIN RUN PROGRESS
++    if progress is not None:
++        progress.finish(f'checkpoint={checkpoint_training_dir}/checkpoints/last')
++    # END RUN PROGRESS
+     final_model_path = _member_final_model_path(checkpoint_training_dir)
+     accelerator.wait_for_everyone()
+     accelerator.end_training()
+diff --git a/src/lerobot/scripts/lerobot_train.py b/src/lerobot/scripts/lerobot_train.py
+index 7d7e94d..9142846 100644
+--- a/src/lerobot/scripts/lerobot_train.py
++++ b/src/lerobot/scripts/lerobot_train.py
+@@ -262,7 +262,7 @@ def train(cfg: TrainPipelineConfig, accelerator: Accelerator | None = None):
+     # On real-world data, no need to create an environment as evaluations are done outside train.py,
+     # using the eval.py instead, with gym_dora environment and dora-rs.
+     eval_env = None
+-    if cfg.eval_freq > 0 and cfg.env is not None:
++    if 0 < cfg.eval_freq <= cfg.steps and cfg.env is not None:
+         if is_main_process:
+             logging.info("Creating env")
+         eval_env = make_env(cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=cfg.eval.use_async_envs)
+@@ -374,6 +374,13 @@ def train(cfg: TrainPipelineConfig, accelerator: Accelerator | None = None):
+     if is_main_process:
+         logging.info("Start offline training on a fixed dataset")
+ 
++    # BEGIN RUN PROGRESS
++    import os
++    progress = None
++    if is_main_process and os.environ.get('VLA_PROJECT_ROOT'):
++        from run_progress import TrainingProgress
++        progress = TrainingProgress(f'policy {cfg.output_dir.parent.name}/{cfg.output_dir.name}', cfg.steps, train_tracker)
++    # END RUN PROGRESS
+     for _ in range(step, cfg.steps):
+         start_time = time.perf_counter()
+         batch = next(dl_iter)
+@@ -394,6 +401,10 @@ def train(cfg: TrainPipelineConfig, accelerator: Accelerator | None = None):
+         # increment `step` here.
+         step += 1
+         train_tracker.step()
++        # BEGIN RUN PROGRESS
++        if progress is not None:
++            progress.record(train_tracker)
++        # END RUN PROGRESS
+         is_log_step = cfg.log_freq > 0 and step % cfg.log_freq == 0 and is_main_process
+         is_saving_step = step % cfg.save_freq == 0 or step == cfg.steps
+         is_eval_step = cfg.eval_freq > 0 and step % cfg.eval_freq == 0
+@@ -480,6 +491,10 @@ def train(cfg: TrainPipelineConfig, accelerator: Accelerator | None = None):
+         close_envs(eval_env)
+ 
+     if is_main_process:
++        # BEGIN RUN PROGRESS
++        if progress is not None:
++            progress.finish(f'checkpoint={cfg.output_dir}/checkpoints/last')
++        # END RUN PROGRESS
+         logging.info("End of training")
+ 
+         if cfg.policy.push_to_hub:
+diff --git a/src/lerobot/utils/gpu_utils.py b/src/lerobot/utils/gpu_utils.py
+new file mode 100644
+index 0000000..b3a5dc0
+--- /dev/null
++++ b/src/lerobot/utils/gpu_utils.py
+@@ -0,0 +1,162 @@
++"""Match NVIDIA CUDA selections to EGL by UUID, never by enumeration position.
++
++EGL enumeration can differ from PCI/nvidia-smi order and ignores CUDA visibility.
++These queries do not initialize CUDA or create any graphics contexts.
++"""
++
++import csv
++import ctypes
++import logging
++import os
++import subprocess
++import time
++import uuid
++from collections.abc import MutableMapping
++
++
++def nvidia_gpu_uuids() -> dict[str, str]:
++    """Resolve numeric selections at startup, tolerating a brief discovery outage."""
++    command = ["nvidia-smi", "--query-gpu=index,uuid", "--format=csv,noheader,nounits"]
++    last_error = None
++    for attempt in range(3):
++        try:
++            output = subprocess.check_output(command, text=True, timeout=10, stderr=subprocess.PIPE)
++            rows = list(csv.reader(output.splitlines()))
++            if not rows or any(len(row) != 2 or not row[0].strip().isdigit()
++                               or not _full_gpu_uuid(row[1].strip()) for row in rows):
++                raise ValueError(f"Invalid GPU inventory: {output.strip()!r}")
++            result = {index.strip(): _full_gpu_uuid(value.strip()) for index, value in rows}
++            if len(result) != len(rows) or len(set(result.values())) != len(rows):
++                raise ValueError("Ambiguous GPU inventory")
++            return result
++        except (subprocess.SubprocessError, OSError, ValueError) as error:
++            last_error = error
++            if attempt < 2:
++                logging.warning("NVIDIA GPU discovery failed; retrying (%s/3): %s", attempt + 1, error)
++                time.sleep(1)
++    details = " ".join(str(value).strip() for value in (
++        last_error, getattr(last_error, "output", ""), getattr(last_error, "stderr", "")
++    ) if value)
++    raise RuntimeError(
++        f"NVIDIA GPU discovery failed after 3 attempts: {details}. "
++        "Check nvidia-smi and GPU access in the launching terminal (a fresh login may be needed "
++        "after group/permission changes). Existing checkpoints are preserved; rerun the same "
++        "command after GPU access recovers. Refusing to choose another GPU."
++    ) from last_error
++
++
++def _full_gpu_uuid(value: str) -> str | None:
++    if not value.lower().startswith("gpu-"):
++        return None
++    try:
++        return "gpu-" + str(uuid.UUID(value[4:]))
++    except ValueError:
++        return None
++
++
++def resolve_cuda_uuids(visible: str, device_order: str) -> list[str]:
++    """Pin all selected GPUs; full UUIDs need no nvidia-smi lookup in children."""
++    selections = [value.strip().lower() for value in visible.split(",")]
++    if not all(selections):
++        raise RuntimeError("Set a nonempty CUDA_VISIBLE_DEVICES list")
++    if any(value.isdigit() for value in selections) and device_order != "PCI_BUS_ID":
++        raise RuntimeError("Numeric GPU selection requires CUDA_DEVICE_ORDER=PCI_BUS_ID")
++    inventory = nvidia_gpu_uuids() if any(not _full_gpu_uuid(value) for value in selections) else {}
++    targets = []
++    for selected in selections:
++        target = _full_gpu_uuid(selected)
++        if target is None and selected.isdigit():
++            target = inventory.get(selected)
++        elif target is None and selected.startswith("gpu-"):
++            matches = [value for value in inventory.values() if value.startswith(selected)]
++            target = matches[0] if len(matches) == 1 else None
++        if target is None:
++            raise RuntimeError(f"Cannot identify selected CUDA GPU {selected!r}; refusing a renderer fallback")
++        targets.append(target)
++    if len(set(targets)) != len(targets):
++        raise RuntimeError("CUDA selections resolve to duplicate GPUs")
++    return targets
++
++
++def egl_gpu_uuids() -> dict[int, str]:
++    """Query NVIDIA EGL_DEVICE_UUID_EXT values without opening a display."""
++    egl = ctypes.CDLL("libEGL.so.1")
++    egl.eglGetProcAddress.argtypes = [ctypes.c_char_p]
++    egl.eglGetProcAddress.restype = ctypes.c_void_p
++
++    def procedure(name, result, *arguments):
++        address = egl.eglGetProcAddress(name.encode())
++        if not address:
++            raise RuntimeError(f"EGL lacks {name}; cannot safely choose the rendering GPU")
++        return ctypes.CFUNCTYPE(result, *arguments)(address)
++
++    query = procedure("eglQueryDevicesEXT", ctypes.c_uint, ctypes.c_int,
++                      ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_int))
++    string = procedure("eglQueryDeviceStringEXT", ctypes.c_char_p, ctypes.c_void_p, ctypes.c_int)
++    binary = procedure("eglQueryDeviceBinaryEXT", ctypes.c_uint, ctypes.c_void_p,
++                       ctypes.c_int, ctypes.c_int, ctypes.c_void_p, ctypes.POINTER(ctypes.c_int))
++    count = ctypes.c_int()
++    if not query(0, None, ctypes.byref(count)):
++        raise RuntimeError("EGL device enumeration failed")
++    devices = (ctypes.c_void_p * count.value)()
++    if not query(count.value, devices, ctypes.byref(count)):
++        raise RuntimeError("EGL device enumeration failed")
++    result = {}
++    for index, device in enumerate(devices[:count.value]):
++        extensions = (string(device, 0x3055) or b"").split()  # EGL_EXTENSIONS
++        if b"EGL_NV_device_cuda" not in extensions:
++            continue
++        if b"EGL_EXT_device_persistent_id" not in extensions:
++            continue
++        value = (ctypes.c_ubyte * 16)()
++        size = ctypes.c_int()
++        if not binary(device, 0x335C, 16, value, ctypes.byref(size)) or size.value != 16:
++            raise RuntimeError(f"Cannot read UUID of NVIDIA EGL device {index}")
++        result[index] = "gpu-" + str(uuid.UUID(bytes=bytes(value)))
++    return result
++
++
++def match_egl_device(visible: str, device_order: str, nvidia: dict[str, str],
++                     egl: dict[int, str]) -> tuple[int, str]:
++    """Render on the first visible CUDA GPU; reject ambiguous or absent matches."""
++    selected = visible.split(",", 1)[0].strip().lower()
++    if selected.isdigit():
++        if device_order != "PCI_BUS_ID":
++            raise RuntimeError("Numeric GPU selection requires CUDA_DEVICE_ORDER=PCI_BUS_ID")
++        target = nvidia.get(selected)
++    elif selected.startswith("gpu-"):
++        matches = [value for value in nvidia.values() if value.lower().startswith(selected)]
++        target = matches[0] if len(matches) == 1 else None
++    else:
++        target = None
++    if target is None:
++        raise RuntimeError(f"Cannot identify selected CUDA GPU {selected!r}; refusing a renderer fallback")
++    matches = [index for index, value in egl.items() if value.lower() == target.lower()]
++    if len(matches) != 1:
++        raise RuntimeError(f"Expected one EGL device for {target}, found {matches}; refusing a renderer fallback")
++    return matches[0], target
++
++
++def configure_egl_for_visible_cuda(env: MutableMapping[str, str] | None = None) -> dict:
++    """Pin CUDA to stable UUIDs and resolve EGL afresh without positional fallback.
++
++    Propagate the resulting CUDA_VISIBLE_DEVICES to workers. Only the initial
++    numeric/prefix selection invokes nvidia-smi; subsequent full-UUID calls do not.
++    EGL enumeration is still checked each time, since its indices can differ.
++    """
++    env = os.environ if env is None else env
++    visible = env.get("CUDA_VISIBLE_DEVICES", "")
++    if not visible:
++        raise RuntimeError("Set CUDA_VISIBLE_DEVICES explicitly before initializing EGL")
++    targets = resolve_cuda_uuids(visible, env.get("CUDA_DEVICE_ORDER", ""))
++    egl = egl_gpu_uuids()
++    inventory = {str(i): value for i, value in enumerate(targets)}
++    matches = [match_egl_device(value, "PCI_BUS_ID", inventory, egl) for value in targets]
++    index, device_uuid = matches[0]
++    # Commit only after *every* selected device passed UUID validation. CUDA's
++    # documented UUID spelling uses uppercase GPU-; comparison stays lowercase.
++    env["CUDA_VISIBLE_DEVICES"] = ",".join("GPU-" + value[4:] for value in targets)
++    env["MUJOCO_EGL_DEVICE_ID"] = str(index)
++    env["VLA_EGL_GPU_UUID"] = device_uuid
++    return {"requested_cuda_visible_devices": visible, "cuda_visible_devices": env["CUDA_VISIBLE_DEVICES"],
++            "egl_device_index": index, "gpu_uuid": device_uuid}
+diff --git a/src/lerobot/utils/train_utils.py b/src/lerobot/utils/train_utils.py
+index 3ebe319..fd2f5bc 100644
+--- a/src/lerobot/utils/train_utils.py
++++ b/src/lerobot/utils/train_utils.py
+@@ -13,6 +13,8 @@
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
++from contextlib import nullcontext
++import os
+ from pathlib import Path
+ 
+ from torch.optim import Optimizer
+@@ -55,6 +57,11 @@ def load_training_step(save_dir: Path) -> int:
+ 
+ 
+ def update_last_checkpoint(checkpoint_dir: Path) -> Path:
++    if os.environ.get("VLA_REPRODUCTION_POLICY"):
++        from reproduction_storage import checkpoint_published, set_last
++        set_last(checkpoint_dir)
++        checkpoint_published(checkpoint_dir)
++        return
+     last_checkpoint_dir = checkpoint_dir.parent / LAST_CHECKPOINT_LINK
+     if last_checkpoint_dir.is_symlink():
+         last_checkpoint_dir.unlink()
+@@ -96,14 +103,19 @@ def save_checkpoint(
+         scheduler (LRScheduler | None, optional): The scheduler to save the state from. Defaults to None.
+         preprocessor: The preprocessor/pipeline to save. Defaults to None.
+     """
+-    pretrained_dir = checkpoint_dir / PRETRAINED_MODEL_DIR
+-    policy.save_pretrained(pretrained_dir)
+-    cfg.save_pretrained(pretrained_dir)
+-    if preprocessor is not None:
+-        preprocessor.save_pretrained(pretrained_dir)
+-    if postprocessor is not None:
+-        postprocessor.save_pretrained(pretrained_dir)
+-    save_training_state(checkpoint_dir, step, optimizer, scheduler)
++    destination = nullcontext(checkpoint_dir)
++    if os.environ.get("VLA_REPRODUCTION_POLICY"):
++        from reproduction_storage import checkpoint_destination
++        destination = checkpoint_destination(checkpoint_dir)
++    with destination as save_dir:
++        pretrained_dir = save_dir / PRETRAINED_MODEL_DIR
++        policy.save_pretrained(pretrained_dir)
++        cfg.save_pretrained(pretrained_dir)
++        if preprocessor is not None:
++            preprocessor.save_pretrained(pretrained_dir)
++        if postprocessor is not None:
++            postprocessor.save_pretrained(pretrained_dir)
++        save_training_state(save_dir, step, optimizer, scheduler)
+ 
+ 
+ def save_training_state(
+diff --git a/tests/test_iterative_fine_tuning_selection.py b/tests/test_iterative_fine_tuning_selection.py
+index 01851b8..468eb44 100644
+--- a/tests/test_iterative_fine_tuning_selection.py
++++ b/tests/test_iterative_fine_tuning_selection.py
+@@ -17,6 +17,7 @@ class _Cfg:
+             task_weighted_episode_selection: str = "top_k",
+         ):
+             self.strategy = strategy
++            self.scoring_metric = "vfd_oneway"
+             self.seed = seed
+             self.max_selected_per_task = max_selected_per_task
+             self.task_selection_temperature = task_selection_temperature

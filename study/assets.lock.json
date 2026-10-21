@@ -1,0 +1,26 @@
+{
+  "uq_vla": {
+    "url": "https://github.com/learnsyslab/uq_vla.git",
+    "revision": "daffea8dd1b7b865a773d52ca0cb910d9259f6b6"
+  },
+  "dataset": {
+    "repo_id": "HuggingFaceVLA/libero",
+    "revision": "86958911c0f959db2bbbdb107eb3e17c5f9c798e"
+  },
+  "vlm": {
+    "repo_id": "HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
+    "revision": "7b375e1b73b11138ff12fe22c8f2822d8fe03467"
+  },
+  "ffmpeg": {
+    "url": "https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz",
+    "sha256": "733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1"
+  },
+  "libero_assets": {
+    "repo_id": "lerobot/libero-assets",
+    "revision": "0b3ea86be5fe169d0fd036ae63d1070ec09e90f6"
+  },
+  "fiper": {
+    "url": "https://github.com/learnsyslab/fiper.git",
+    "revision": "13d79c5c3069def843e454787ff128defc249838"
+  }
+}

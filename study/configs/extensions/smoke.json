@@ -1,0 +1,53 @@
+{
+  "allow_smoke_base": true,
+  "arm": "random",
+  "base_models": [
+    "outputs/smoke/pretrain/checkpoints/000002/pretrained_model"
+  ],
+  "batch_queries": 1,
+  "budget_gb": 100,
+  "companion": false,
+  "data_manifest": "storage/extensions/data/data_manifest.json",
+  "eligibility_protocol": "upstream_reference",
+  "evaluation_batch_size": 15,
+  "evaluation_max_steps": 2,
+  "evaluation_repetitions": 1,
+  "evaluation_split": "development",
+  "feature_batch_size": 1,
+  "features": {
+    "bank": "joint_intermediate",
+    "components": 512,
+    "compression": "pca",
+    "language_bins": 8,
+    "local_grid": 4,
+    "scene_grid": 2,
+    "seed": 42,
+    "target_bank": "joint_late",
+    "variance_floor": 1e-08
+  },
+  "fit_steps": 2,
+  "frozen_recipe": null,
+  "gp": {
+    "fit_steps": 200,
+    "inducing_points": 512,
+    "inference": "exact",
+    "input_components": 32,
+    "input_projection": "pls",
+    "jitter": 1e-06,
+    "learning_rate": 0.05,
+    "output_components": 16,
+    "precision": "float32",
+    "ridge": 0.001,
+    "sparse_justification": null
+  },
+  "name": "manual_smoke",
+  "num_workers": 0,
+  "output_root": "storage/extensions/runs",
+  "phase": "smoke",
+  "refit_steps": 2,
+  "rounds": 1,
+  "save_frequency": 1,
+  "seed": 1000,
+  "train_batch_size": 1,
+  "training_mode": "save_warm_50_50"
+}

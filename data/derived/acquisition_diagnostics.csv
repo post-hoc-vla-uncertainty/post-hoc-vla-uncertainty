@@ -1,0 +1,7 @@
+arm,task_weight_entropy_r1,task_weight_entropy_r15,task_mean_ratio_max_min,score_after_acquisition_ratio,repeated_or_preparatory_slot_fraction,max_times_one_demo
+h1,0.807911,0.822553,433.235,0.00213292,0,1
+h1_ivr,0.807911,0.805575,532.614,0.00224071,0,1
+h2,0.82106,0.806264,50.5429,0.0158008,0,1
+h3,0.999522,0.999861,1.03825,0.997586,0.644444,8
+h4,0.544668,0.706814,8.90833,1.00225,0.76,13
+vfd,0.646284,0.929366,2.82264,0.274838,0.0755556,1

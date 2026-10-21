@@ -1,0 +1,57 @@
+{
+  "storage_root": "storage",
+  "data_manifest": "storage/extensions/data/data_manifest.json",
+  "feature_batch_size": 8,
+  "evaluation_batch_size": 15,
+  "trajectory_budget_gb": 100,
+  "panel_rounds": [
+    0,
+    5,
+    10,
+    15
+  ],
+  "refit_rounds": [
+    1,
+    10
+  ],
+  "refit_budgets": [
+    4000,
+    8000
+  ],
+  "projection_seeds": [
+    42,
+    43,
+    44
+  ],
+  "teaching_round_candidates": [
+    5,
+    10
+  ],
+  "features": {
+    "components": 512,
+    "action_bins": 50,
+    "flow_samples": 50,
+    "support_flow_samples": 4,
+    "reference_flow_samples": 4,
+    "flow_indices": [
+      0,
+      5,
+      9
+    ],
+    "flow_weights": [
+      1,
+      1,
+      1
+    ],
+    "flow_seed": 1729,
+    "expert_context": true,
+    "patch_aggregation": "top_mean",
+    "patch_top_fraction": 0.1,
+    "camera_aggregation": "max",
+    "geometry_samples": 4096
+  },
+  "eligibility_by_mode": {
+    "save_warm_50_50": "upstream_reference",
+    "pristine_refit": "upstream_reference"
+  }
+}

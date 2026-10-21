@@ -1,0 +1,326 @@
+<title>Q5 Results Summary</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #fcfcfd; --fg: #18202b; --muted: #5d6674; --faint: #8a919c; --line: #e3e6eb; --soft: #f3f5f8;
+  --accent: #1f5aa6; --amber: #b8641a; --tip-bg: #18202b; --tip-fg: #f3f5f8;
+  --mid: #f0efec; --b1: #b7d3f6; --b2: #6da7ec; --b3: #2a78d6; --b4: #184f95; --r1: #f6c4b6; --r2: #e0705a;
+  --serif: "Source Serif 4", Georgia, serif; --sans: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Source Code Pro", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  color-scheme: dark; --bg: #121519; --fg: #e8eaee; --muted: #a0a7b2; --faint: #7a818c; --line: #2a2f37; --soft: #1a1e24;
+  --accent: #7aa9ea; --amber: #e59a4f; --tip-bg: #e8eaee; --tip-fg: #121519;
+  --mid: #34363a; --b1: #1f3a63; --b2: #24589c; --b3: #3987e5; --b4: #86b6ef; --r1: #5a3029; --r2: #d9735e; } }
+:root[data-theme="dark"] {
+  color-scheme: dark; --bg: #121519; --fg: #e8eaee; --muted: #a0a7b2; --faint: #7a818c; --line: #2a2f37; --soft: #1a1e24;
+  --accent: #7aa9ea; --amber: #e59a4f; --tip-bg: #e8eaee; --tip-fg: #121519;
+  --mid: #34363a; --b1: #1f3a63; --b2: #24589c; --b3: #3987e5; --b4: #86b6ef; --r1: #5a3029; --r2: #d9735e; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--sans); }
+main { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 64px; display: grid; gap: 44px; }
+h1, h2 { font-family: var(--serif); font-weight: 600; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.15; }
+h2 { font-size: 24px; }
+p { margin: 0; max-width: 72ch; }
+.kicker { font: 500 12.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
+.muted { color: var(--muted); }
+header { display: grid; gap: 10px; }
+.status { display: inline-flex; gap: 8px; align-items: center; font-size: 14.5px; color: var(--muted); }
+.status i { width: 9px; height: 9px; border-radius: 50%; background: var(--amber); display: inline-block; }
+section { display: grid; gap: 14px; }
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.finding { border-top: 3px solid var(--accent); background: var(--soft); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+.finding.limit { border-top-color: var(--amber); }
+.finding h3 { margin: 0; font: 600 17px/1.3 var(--serif); }
+.finding .num { font: 500 15px var(--mono); }
+.finding p { font-size: 15px; color: var(--muted); }
+.scroll { overflow-x: auto; }
+.heat { display: grid; grid-template-columns: minmax(230px, 1.6fr) repeat(11, minmax(52px, 1fr)) minmax(96px, auto); font-size: 13px; min-width: 980px; }
+.heat .hd { font-weight: 600; color: var(--muted); padding: 4px 2px; text-align: center; align-self: end; font-size: 12.5px; }
+.heat .grp { grid-row: 1; text-align: center; font: 500 11.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+  border-bottom: 1px solid var(--line); padding-bottom: 4px; margin: 0 3px; }
+.heat .row { padding: 4px 8px 4px 0; display: flex; flex-direction: column; justify-content: center; border-top: 1px solid var(--line); }
+.heat .row b { font-weight: 600; } .heat .row span { font-size: 11.5px; color: var(--faint); }
+.heat .c { margin: 2px; border-radius: 4px; display: grid; place-items: center; font: 500 12.5px var(--mono); min-height: 34px; cursor: default; }
+.heat .c.sig { font-weight: 700; }
+.heat .c.na { background: transparent; color: var(--faint); }
+.heat .c:hover, .heat .c:focus-visible { outline: 2px solid var(--fg); outline-offset: 0; }
+.heat .s { display: grid; place-items: center; font: 500 12.5px var(--mono); color: var(--fg); border-top: 1px solid var(--line); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-size: 13.5px; color: var(--muted); }
+.ramp { display: flex; height: 12px; width: 220px; border-radius: 3px; overflow: hidden; }
+.ramp span { flex: 1; }
+.ramp-labels { display: flex; justify-content: space-between; width: 220px; font: 500 11.5px var(--mono); color: var(--muted); }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 880px) { .two { grid-template-columns: 1fr; } }
+svg text { font-family: var(--sans); }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 14.5px; }
+table caption { caption-side: bottom; text-align: left; color: var(--muted); font-size: 13.5px; padding-top: 8px; }
+th, td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--line); }
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--fg); }
+td .ci { color: var(--faint); font-size: 12.5px; font-family: var(--mono); }
+td.best { color: var(--accent); font-weight: 700; }
+ul.caveats { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 80ch; }
+ul.caveats li::marker { color: var(--amber); }
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+.links a { color: var(--accent); }
+#tip { position: fixed; pointer-events: none; background: var(--tip-bg); color: var(--tip-fg); font-size: 13px; line-height: 1.4;
+  padding: 7px 10px; border-radius: 6px; max-width: 280px; opacity: 0; transition: opacity .08s; z-index: 10; }
+.dot { cursor: default; }
+</style>
+
+<main>
+  <header>
+    <span class="kicker">Q5 · context-specific uncertainty heads · LIBERO-10</span>
+    <h1>E1, E2 and E3 results: which input is unfamiliar, and does it matter</h1>
+    <p class="muted">Three primary/companion policy pairs trained on all ten LIBERO-10 tasks (paper recipe). Heads fitted per seed on
+      the primary's training demonstrations (dense support: every 10th frame). AUROC values are means over the three seeds;
+      intervals are a hierarchical bootstrap over seeds and starting states (2,000 draws). VFD compares each primary with its companion.</p>
+    <span class="status"><i></i>All three experiments complete; paired differences, alarm calibration and the paper figures are still to come.</span>
+  </header>
+
+  <section aria-labelledby="f">
+    <h2 id="f">Main findings</h2>
+    <div class="findings" id="findings"></div>
+  </section>
+
+  <section aria-labelledby="e1h">
+    <h2 id="e1h">E1 · Perturbed starting observations</h2>
+    <p class="muted">Detection AUROC of perturbed vs clean first observations of the same starting states, within each task
+      (10 tasks × 25 states; VFD on states 0–9). One severity level per family; hover a cell for its interval and spread over seeds.
+      Success: the primary executed with the family's middle level (seed 0, 3 executions; clean <span id="clean"></span>).</p>
+    <div class="scroll"><div class="heat" id="heat-e1" role="table" aria-label="E1 detection AUROC per perturbation and head"></div></div>
+  </section>
+
+  <section aria-labelledby="e3h">
+    <h2 id="e3h">E3 · Events during the episode</h2>
+    <p class="muted">Window AUROC (steps 100–149 after onset) of each event run vs its clean twin, 10 tasks × 2 starting states
+      × 3 seeds. Success: clean → event.</p>
+    <div class="scroll"><div class="heat" id="heat-e3" role="table" aria-label="E3 window AUROC per event and head"></div></div>
+    <div class="legend" aria-hidden="true">
+      <div><div class="ramp" id="ramp"></div><div class="ramp-labels"><span>0.25</span><span>0.5 no signal</span><span>1.0</span></div></div>
+      <span>Bold: 95 % interval excludes 0.5 · “–”: variant not defined for the head’s data</span>
+    </div>
+  </section>
+
+  <section aria-labelledby="harm">
+    <h2 id="harm">Detection is not harm</h2>
+    <div class="two">
+      <figure style="margin:0">
+        <svg id="scatter" viewBox="0 0 560 380" role="img" aria-label="Scatter plot of KV-Ctx detection AUROC against the drop in success per perturbation."></svg>
+        <figcaption class="muted" style="font-size:13.5px">KV-Ctx detection (E1, x) against the drop in the primary's success (seed 0, y), one point per
+          perturbation at its middle level. Hover a point for details.</figcaption>
+      </figure>
+      <div style="display:grid; gap:10px">
+        <p>Points spread across the whole plane. Some perturbations are detected but harmless: image noise, the occluder, the table
+          texture. Others are harmful but barely visible to the heads; the clearest case is a familiar instruction from another task in the same scene.</p>
+        <p class="muted">The heads measure how well the training data support an input, not whether the action will succeed.
+          This matches the paper's framing and is the reason E2 measures usefulness separately.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="e2h">
+    <h2 id="e2h">E2 · Referral within a task</h2>
+    <p class="muted">Each condition (10 tasks × 10 starting states × 13 label-preserving variants, three of them expected harmless) is
+      played three times by the primary and by a supervisor trained with label-preserving augmentation. The score of its starting
+      observation decides which conditions go to the supervisor. Within-task nAUC: 0 = random referral, 1 = oracle. Mean over
+      three seeds ± SD, hierarchical-bootstrap interval in brackets. Metrics computed with the paper's own analysis code.</p>
+    <div class="scroll"><table id="e2table">
+      <caption id="e2caption"></caption>
+      <thead><tr><th>Score</th><th>Kind</th><th>Within-task nAUC</th><th>Global nAUC</th><th>Automated</th><th>Failure AUROC</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div class="two" style="margin-top:8px">
+      <figure style="margin:0">
+        <svg id="gains" viewBox="0 0 560 360" role="img" aria-label="Bar chart of the supervisor's gain over the primary per variant."></svg>
+        <figcaption class="muted" style="font-size:13.5px">Supervisor minus primary success per variant (mean over seeds, tasks and starting states).
+          Grey bars: variants expected to be harmless.</figcaption>
+      </figure>
+      <div style="display:grid; gap:10px" id="e2text"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cmp">
+    <h2 id="cmp">Paper heads vs the ensemble baseline</h2>
+    <div class="scroll"><table id="compare">
+      <caption>AUROC with 95 % hierarchical-bootstrap interval. Blue: best of the three where the intervals do not overlap with VFD's.</caption>
+      <thead><tr><th>Exp.</th><th>Perturbation</th><th>KV-Ctx</th><th>KV-Dec</th><th>VFD (2 policies)</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <section aria-labelledby="cav">
+    <h2 id="cav">Caveats before this goes into the paper</h2>
+    <ul class="caveats" id="caveats"></ul>
+  </section>
+
+  <section aria-labelledby="det">
+    <h2 id="det">Detailed tables</h2>
+    <div class="links">
+      <a href="https://claude.ai/artifact/UBivztJcz6cL9gZawJG2LP">E1: all 66 perturbations, both support sets, all heads</a>
+      <a href="https://claude.ai/artifact/3vEh4hd6AmzxJK3ABPyJVG">E3: all events, rise in percentile, alarm rates</a>
+    </div>
+  </section>
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const D = __DATA__;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, t) => { const x = hex(a), y = hex(b); return `rgb(${x.map((v, i) => Math.round(v + (y[i] - v) * t)).join(",")})`; };
+function fill(v) {  // diverging around 0.5: blue above, red below, neutral grey at 0.5
+  const stops = v >= 0.5
+    ? [[0.5, css("--mid")], [0.62, css("--b1")], [0.75, css("--b2")], [0.88, css("--b3")], [1.0, css("--b4")]]
+    : [[0.5, css("--mid")], [0.38, css("--r1")], [0.25, css("--r2")]];
+  const vv = v >= 0.5 ? Math.min(v, 1) : Math.max(v, 0.25);
+  for (let i = 1; i < stops.length; i++) {
+    const [a, ca] = stops[i - 1], [b, cb] = stops[i];
+    if ((v >= 0.5 && vv <= b) || (v < 0.5 && vv >= b)) return mix(ca, cb, (vv - a) / (b - a));
+  }
+  return stops[stops.length - 1][1];
+}
+const ink = rgb => { const [r, g, b] = rgb.match(/\d+/g).map(Number); return (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? "#18202b" : "#f6f7f9"; };
+const tip = document.getElementById("tip");
+function showTip(e, html) { tip.innerHTML = html; tip.style.opacity = 1; const x = Math.min(e.clientX + 14, innerWidth - 300); tip.style.left = x + "px"; tip.style.top = (e.clientY + 14) + "px"; }
+const hideTip = () => { tip.style.opacity = 0; };
+const fmt = v => v == null ? "–" : v.toFixed(2);
+const sig = c => c && c.lo != null && (c.lo > 0.5 || c.hi < 0.5);
+
+function heat(id, rows, successText) {
+  const el = document.getElementById(id);
+  const groups = [["Raw input heads (before the transformer)", 2, 4], ["Fused heads (after it)", 6, 4], ["Paper heads", 10, 2], ["Baseline", 12, 1]];
+  el.insertAdjacentHTML("beforeend", `<div style="grid-row:1;grid-column:1"></div>`);
+  for (const [label, col, span] of groups) el.insertAdjacentHTML("beforeend", `<div class="grp" style="grid-column:${col} / span ${span}">${label}</div>`);
+  el.insertAdjacentHTML("beforeend", `<div style="grid-row:1;grid-column:13"></div><div class="hd" style="text-align:left">Perturbation</div>`);
+  for (const c of D.columns) el.insertAdjacentHTML("beforeend", `<div class="hd">${c.label}</div>`);
+  el.insertAdjacentHTML("beforeend", `<div class="hd">Success</div>`);
+  for (const r of rows) {
+    el.insertAdjacentHTML("beforeend", `<div class="row" role="rowheader"><b>${r.label}</b><span>${r.key} · ${r.input}</span></div>`);
+    r.cells.forEach((c, i) => {
+      const div = document.createElement("div");
+      div.setAttribute("role", "cell"); div.tabIndex = 0;
+      if (!c) { div.className = "c na"; div.textContent = "–"; el.appendChild(div); return; }
+      const bg = fill(c.v); div.className = "c" + (sig(c) ? " sig" : ""); div.style.background = bg; div.style.color = ink(bg);
+      div.textContent = fmt(c.v);
+      const html = `<b>${r.label}</b><br>${D.columns[i].label} (${D.columns[i].key})<br>AUROC ${c.v.toFixed(3)}`
+        + (c.lo != null ? ` [${c.lo.toFixed(2)}, ${c.hi.toFixed(2)}]` : "") + (c.sd != null ? `<br>SD over seeds ${c.sd.toFixed(3)}` : "");
+      div.addEventListener("mousemove", e => showTip(e, html)); div.addEventListener("mouseleave", hideTip);
+      div.addEventListener("focus", () => { const b = div.getBoundingClientRect(); showTip({ clientX: b.right, clientY: b.top }, html); });
+      div.addEventListener("blur", hideTip);
+      el.appendChild(div);
+    });
+    el.insertAdjacentHTML("beforeend", `<div class="s">${successText(r)}</div>`);
+  }
+}
+document.getElementById("clean").textContent = D.clean_success.toFixed(2);
+heat("heat-e1", D.e1, r => r.success == null ? "–" : r.success.toFixed(2));
+heat("heat-e3", D.e3, r => `${r.success[0].toFixed(2)} → ${r.success[1].toFixed(2)}`);
+const ramp = document.getElementById("ramp");
+for (let v = 0.25; v <= 1.0001; v += 0.025) ramp.insertAdjacentHTML("beforeend", `<span style="background:${fill(v)}"></span>`);
+
+// Findings, from the data.
+const e1 = Object.fromEntries(D.e1.map(r => [r.key, r])), e3 = Object.fromEntries(D.e3.map(r => [r.key, r]));
+const col = k => D.columns.findIndex(c => c.key === k);
+const v = (row, k) => row.cells[col(k)].v.toFixed(2);
+const findings = [
+  ["Each raw head responds only to its own input",
+   `instruction head: ${v(e1["I1:P5"], "pre_lang")} on a paraphrase, ${v(e1["V1:x0.4"], "pre_lang")} on dimmed light`,
+   "Exactly 0.50 for every perturbation of another input, across both experiments and all three seeds.", ""],
+  ["One policy matches or beats the two-policy ensemble",
+   `negated instruction (E3): KV-Ctx ${v(e3.I5, "kv_ctx")} vs VFD ${v(e3.I5, "vfd")}`,
+   `Light ×0.4: ${v(e3.V1, "kv_ctx")} vs ${v(e3.V1, "vfd")}; distractor (E1): ${v(e1["S2:near"], "kv_ctx")} vs ${v(e1["S2:near"], "vfd")}.`, ""],
+  ["Detection and harm are separate",
+   `image noise: AUROC ${v(e1["V2:sigma0.08"], "pre_wrist")} (wrist), success ${e1["V2:sigma0.08"].success.toFixed(2)}`,
+   `An invisible mass change costs success but stays at AUROC ${v(e3.D1, "kv_ctx")} for every head.`, ""],
+  ["A familiar but wrong instruction goes unseen",
+   `other task's instruction: KV-Ctx ${v(e1["M1:same_scene"], "kv_ctx")}, VFD ${v(e1["M1:same_scene"], "vfd")}, success ${e1["M1:same_scene"].success.toFixed(2)}`,
+   "The mismatch the draft expects the fused heads to catch is not detected by any head or by VFD.", "limit"],
+];
+document.getElementById("findings").innerHTML = findings.map(([h, n, p, cls]) =>
+  `<div class="finding ${cls}"><h3>${h}</h3><span class="num">${n}</span><p>${p}</p></div>`).join("");
+
+// Scatter: detection vs harm.
+(() => {
+  const svg = document.getElementById("scatter"), W = 560, H = 380, L = 56, R = 16, T = 16, B = 46;
+  const x = a => L + (a - 0.4) / 0.6 * (W - L - R), y = d => T + (0.9 - d) / 1.0 * (H - T - B);
+  let s = "";
+  for (const t of [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]) s += `<line x1="${x(t)}" x2="${x(t)}" y1="${T}" y2="${H - B}" stroke="${css("--line")}"/><text x="${x(t)}" y="${H - B + 18}" text-anchor="middle" font-size="12" fill="${css("--muted")}">${t.toFixed(1)}</text>`;
+  for (const t of [-0.1, 0, 0.2, 0.4, 0.6, 0.8]) s += `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}" stroke="${css("--line")}"/><text x="${L - 8}" y="${y(t) + 4}" text-anchor="end" font-size="12" fill="${css("--muted")}">${t.toFixed(1)}</text>`;
+  s += `<line x1="${x(0.5)}" x2="${x(0.5)}" y1="${T}" y2="${H - B}" stroke="${css("--faint")}" stroke-dasharray="4 4"/>`;
+  s += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle" font-size="13" fill="${css("--muted")}">KV-Ctx detection AUROC (E1)</text>`;
+  s += `<text transform="translate(14 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle" font-size="13" fill="${css("--muted")}">Drop in success (clean − perturbed)</text>`;
+  const label = { "M1:same_scene": "other task's instruction", "V2:sigma0.08": "image noise", "V6:blackout": "wrist black", "V5:table": "table texture", "V4:50": "occluder" };
+  for (const p of D.scatter) {
+    s += `<circle class="dot" cx="${x(p.kv_ctx)}" cy="${y(p.drop)}" r="5.5" fill="${css("--b3")}" stroke="${css("--bg")}" stroke-width="2" data-v="${p.variant}"/>`;
+    if (label[p.variant]) s += `<text x="${x(p.kv_ctx) + (p.kv_ctx > 0.9 ? -9 : 9)}" y="${y(p.drop) - 8}" text-anchor="${p.kv_ctx > 0.9 ? "end" : "start"}" font-size="12" fill="${css("--fg")}">${label[p.variant]}</text>`;
+  }
+  svg.innerHTML = s;
+  svg.querySelectorAll(".dot").forEach(c => {
+    const p = D.scatter.find(q => q.variant === c.dataset.v);
+    c.addEventListener("mousemove", e => showTip(e, `<b>${p.variant}</b><br>KV-Ctx AUROC ${p.kv_ctx.toFixed(2)} · VFD ${p.vfd.toFixed(2)}<br>success drop ${p.drop.toFixed(2)}`));
+    c.addEventListener("mouseleave", hideTip);
+  });
+})();
+
+// Comparison table.
+document.querySelector("#compare tbody").innerHTML = D.compare.map(r => {
+  const best = ["kv_ctx", "kv_dec"].filter(h => r[h] && r.vfd && r[h].lo > r.vfd.hi);
+  const td = h => r[h] ? `<td class="${best.includes(h) ? "best" : ""}">${r[h].v.toFixed(2)} <span class="ci">[${r[h].lo.toFixed(2)}, ${r[h].hi.toFixed(2)}]</span></td>` : "<td>–</td>";
+  return `<tr><td>${r.exp}</td><td>${r.label}</td>${td("kv_ctx")}${td("kv_dec")}${td("vfd")}</tr>`;
+}).join("");
+
+// E2.
+if (D.e2) {
+  const f2 = (m, d = 2) => `${m.mean.toFixed(d)} <span class="ci">± ${m.sd.toFixed(d)} [${m.lo.toFixed(2)}, ${m.hi.toFixed(2)}]</span>`;
+  const vfd = D.e2.rows.find(r => r.key === "vfd").within_nauc;
+  document.querySelector("#e2table tbody").innerHTML = D.e2.rows.map(r =>
+    `<tr><td class="${r.within_nauc.lo > vfd.hi ? "best" : ""}">${r.label}</td><td>${r.kind}</td><td>${f2(r.within_nauc)}</td><td>${f2(r.global_nauc)}</td>`
+    + `<td>${f2(r.automation)}</td><td>${f2(r.failure_auroc)}</td></tr>`).join("");
+  const cl = D.e2.clean;
+  document.getElementById("e2caption").textContent = `Clean success per seed, primary vs supervisor: ${cl.primary.map((p, i) => `${p.toFixed(2)}/${cl.supervisor[i].toFixed(2)}`).join(", ")}.`
+    + (D.e2.initial ? ` With the paper's first-frame support: KV-Ctx ${D.e2.initial.kv_ctx.toFixed(2)}, KV-Dec ${D.e2.initial.kv_dec.toFixed(2)} within-task nAUC.` : "")
+    + " Name in blue: interval entirely above VFD's.";
+  const svg = document.getElementById("gains"), W = 560, H = 360, L = 104, R = 40, T = 10, B = 30;
+  const fams = D.e2.families, n = fams.length, bh = (H - T - B) / n;
+  const lo = -0.1, hi = 0.6, x = v => L + (v - lo) / (hi - lo) * (W - L - R);
+  let g = "";
+  for (const t of [-0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]) g += `<line x1="${x(t)}" x2="${x(t)}" y1="${T}" y2="${H - B}" stroke="${t === 0 ? css("--faint") : css("--line")}"/><text x="${x(t)}" y="${H - B + 16}" text-anchor="middle" font-size="11.5" fill="${css("--muted")}">${t.toFixed(1)}</text>`;
+  fams.forEach((f, i) => {
+    const y = T + i * bh + 3, h = bh - 6, x0 = x(Math.min(0, f.gain)), w = Math.abs(x(f.gain) - x(0));
+    const colour = f.harmless || f.variant === "clean" ? css("--faint") : css("--b3");
+    g += `<text x="${L - 8}" y="${y + h / 2 + 4}" text-anchor="end" font-size="12" fill="${css("--fg")}">${f.variant}</text>`;
+    g += `<rect class="dot" x="${x0}" y="${y}" width="${Math.max(w, 1)}" height="${h}" rx="3" fill="${colour}" data-i="${i}"/>`;
+    g += `<text x="${x(Math.max(0, f.gain)) + 5}" y="${y + h / 2 + 4}" font-size="11.5" fill="${css("--muted")}">${f.gain >= 0 ? "+" : ""}${f.gain.toFixed(2)}</text>`;
+  });
+  svg.innerHTML = g;
+  svg.querySelectorAll("rect.dot").forEach(r => { const f = fams[+r.dataset.i];
+    r.addEventListener("mousemove", e => showTip(e, `<b>${f.variant}</b><br>primary ${f.primary.toFixed(2)} · supervisor ${f.supervisor.toFixed(2)}<br>gain ${f.gain >= 0 ? "+" : ""}${f.gain.toFixed(2)}`));
+    r.addEventListener("mouseleave", hideTip); });
+  const get = k => D.e2.rows.find(r => r.key === k).within_nauc;
+  document.getElementById("e2text").innerHTML = `<p>Referring the conditions a head rates as least familiar to the supervisor recovers a clear share of the oracle's gain within tasks, in all three seeds:
+    KV-Dec <b>${get("kv_dec").mean.toFixed(2)}</b>, KV-Ctx <b>${get("kv_ctx").mean.toFixed(2)}</b>, VFD <b>${get("vfd").mean.toFixed(2)}</b>
+    (cross-replicate reference ${get("cross_replicate").mean.toFixed(2)}).</p>
+    <p class="muted">Combining the context heads does not help: COMB ${get("comb").mean.toFixed(2)}, COMB-mean ${get("comb_mean").mean.toFixed(2)}, both below KV-Ctx.
+    The heads beat the cross-replicate reference, likely because the gain from a single execution is noisy while the heads see which input changed.
+    The gain comes from the variants the supervisor learned; where the primary already copes (noise, camera shift, occluder), there is nothing to win.</p>`;
+  findings.push(["Uncertainty-based referral works within tasks",
+    `within-task nAUC: KV-Dec ${get("kv_dec").mean.toFixed(2)}, KV-Ctx ${get("kv_ctx").mean.toFixed(2)}, VFD ${get("vfd").mean.toFixed(2)}`,
+    "0 = random, 1 = oracle; consistent over the three seeds. This supports the second half of Q5.", ""]);
+  document.getElementById("findings").innerHTML = findings.map(([h, n, p, cls]) =>
+    `<div class="finding ${cls}"><h3>${h}</h3><span class="num">${n}</span><p>${p}</p></div>`).join("");
+}
+
+document.getElementById("caveats").innerHTML = [
+  "Part of the selectivity holds by construction: a head that reads only the instruction tokens cannot respond to images. The informative part is how much the fused heads mix inputs.",
+  "Subtle realistic changes are detected only moderately (camera bumped, occluder, target rotated: AUROC 0.55–0.68).",
+  `LIBERO resets the three kitchen scenes (tasks 3, 8, 9) non-deterministically, so E3 twins match before the onset in ${Math.round(D.e3_identical * 100)} % of pairs; restricting E3 to the seven other tasks changes values by at most ±0.05.`,
+  "A per-step alarm threshold fires on 33–43 % of clean episodes; an alarm metric needs episode-level calibration before it is reported.",
+  "COMB (maximum percentile over the context heads) is capped near 0.93 by the 25 calibration observations and rises slightly for any change, so it does not yet support a ‘combining heads helps’ claim.",
+  "With the paper's first-frame support the 8-value state head saturates and misses state perturbations; the dense support used here fixes this and has to be stated as a deviation.",
+  "One benchmark (LIBERO-10) and three seeds; paired KV − VFD differences with intervals are still to be computed.",
+  "E2: the seed-1 supervisor's clean success is 6 points below its primary's (handoff asks for about 5); seeds 0 and 2 are within 2 points.",
+].map(t => `<li>${t}</li>`).join("");
+</script>
